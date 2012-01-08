@@ -25,23 +25,23 @@ my $tempdir = tempdir( "/tmp/tmpdir-XXXXXXXXXX", CLEANUP => 1 );
 }
 
 {
-    ok( my $trie = File::Trie->new( { root => $tempdir, maxdepth => 3 } ),
-        "Creating a new File::Trie object with maxdepth 3"
+    ok( my $trie = File::Trie->new( { root => $tempdir, maxdepth => 2 } ),
+        "Creating a new File::Trie object with maxdepth 2"
     );
 
     is( $trie->trie( "abc.txt" ),
         "/a/b/c.txt",
-        "Checking that abc.txt gets written to /a/b/c.txt with maxdepth 3"
+        "Checking that abc.txt gets written to /a/b/c.txt with maxdepth 2"
     );
 
     is( $trie->trie( "abcd.txt" ),
         "/a/b/cd.txt",
-        "Checking that abc.txt gets written to /a/b/cd.txt with maxdepth 3"
+        "Checking that abc.txt gets written to /a/b/cd.txt with maxdepth 2"
     );
 
     is( $trie->trie( "abc123.txt" ),
         "/a/b/c123.txt",
-        "Checking abc123.txt with maxdepth 3"
+        "Checking abc123.txt with maxdepth 2"
     );
 }
 
