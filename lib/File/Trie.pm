@@ -20,6 +20,31 @@ has 'bytes' => ( is => 'ro',
                  default => 1,
              );
 
+sub trie {
+    my ( $self, $orig_key ) = @_;
+
+    my $count = 0;
+
+    my $key = $orig_key;
+    $key =~ s|\..*$||;
+
+    my $dir = "";
+  LETTER:
+    while ( my $letter = substr( $key, $count, $self->bytes ) ) {
+
+        $count += length( $letter );
+
+        $dir .= "/$letter";
+
+        if ( $self->maxdepth ) { last if $count eq $self->maxdepth }
+    }
+
+    my $path = $dir;
+    $path .= substr( $orig_key, $count );
+
+    return $path;
+}
+
 sub write {
     my ( $self, $data, $key ) = @_;
 
@@ -47,35 +72,6 @@ sub _get_filename_mkdir {
     }
 
     my $path = join( "/", $self->root, $filename );
-    return $path;
-}
-
-sub trie {
-    my ( $self, $orig_key ) = @_;
-
-    my $count = 0;
-
-    my $key = $orig_key;
-    $key =~ s|\..*$||;
-
-    my $dir = "";
-  LETTER:
-    while ( my $letter = substr( $key, $count, $self->bytes ) ) {
-
-        if ( $letter eq "." ) {
-            last LETTER;
-        }
-
-        $count += length( $letter );
-
-        $dir .= "/$letter";
-
-        if ( $self->maxdepth ) { last if $count eq $self->maxdepth }
-    }
-
-    my $path = $dir;
-    $path .= substr( $orig_key, $count );
-
     return $path;
 }
 
