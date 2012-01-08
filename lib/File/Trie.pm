@@ -12,7 +12,7 @@ use YAML::XS;
 
 =head1 NAME
 
-File::Trie - store data as YAML in a directory tree using a trie of the ids
+File::Trie - store data in a YAML file in a directory tree using a trie of the id
 
 =head1 DESCRIPTION
 
@@ -24,6 +24,16 @@ without having too many files in any specific directory.
 
 =head1 SYNOPSIS
 
+  my $trie = File::Trie->new( { root => '/foo' } );
+
+  # returns "/a/b/c/d.yaml"
+  my $path = $trie->trie( "abcd.yaml" );
+
+  # write data to the file in /foo/a/b/c/d.yaml
+  $trie->write( { 1 => 2 }, 'abcd.yaml';
+
+  # read data back in again
+  my $data = $trie->read( 'abcd.yaml' );
 
 =cut
 
