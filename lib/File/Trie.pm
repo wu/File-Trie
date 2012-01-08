@@ -1,6 +1,7 @@
 package File::Trie;
 use Moose;
 
+use File::Basename;
 use File::Path;
 use YAML::XS;
 
@@ -38,14 +39,14 @@ sub read {
 sub _get_filename_mkdir {
     my ( $self, $key ) = @_;
 
-    my $filename = $self->trie( $key );
+    my $filename = $self->trie( "$key.yaml" );
 
-    my ( $path, $dir ) = join( "/", $self->root, $filename );
-
+    my $dir = join( "/", $self->root, dirname( $filename ) );
     unless ( -d $dir ) {
         mkpath( $dir );
     }
 
+    my $path = join( "/", $self->root, $filename );
     return $path;
 }
 
@@ -75,12 +76,7 @@ sub trie {
     my $path = $dir;
     $path .= substr( $orig_key, $count );
 
-    if ( wantarray() ) {
-        return ( $path, $dir );
-    }
-    else {
-        return $path;
-    }
+    return $path;
 }
 
 1;
