@@ -12,7 +12,7 @@ use YAML::XS;
 
 =head1 NAME
 
-File::Trie - store data in a YAML file in a directory tree using a trie of the id
+File::Trie - store data in a file in a directory tree using a trie of the id
 
 =head1 DESCRIPTION
 
@@ -108,15 +108,21 @@ sub trie {
     my $id = $orig_id;
     $id =~ s|\..*$||;
 
+    my $length = length( $id );
+
+    my $bytes = $self->bytes;
+
     my $path = "";
   LETTER:
-    while ( my $letter = substr( $id, $count, $self->bytes ) ) {
+    while ( 1 ) {
+        my $letter = substr( $id, $count, $bytes );
 
         $count += length( $letter );
 
         $path .= "/$letter";
 
-        if ( $self->maxdepth ) { last if $count == $self->maxdepth + 1 }
+        if ( $self->maxdepth ) { last if $count - 1 >= $self->maxdepth }
+        last if $count >= $length;
     }
 
     $path .= substr( $orig_id, $count );

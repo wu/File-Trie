@@ -22,6 +22,11 @@ my $tempdir = tempdir( "/tmp/tmpdir-XXXXXXXXXX", CLEANUP => 1 );
         "/a/b/c/1/2/3.txt",
         "Checking abc123.txt"
     );
+
+    is( $trie->trie( "a0163f54c6a1fc4b123e241603d66bfc.yaml" ),
+        "/a/0/1/6/3/f/5/4/c/6/a/1/f/c/4/b/1/2/3/e/2/4/1/6/0/3/d/6/6/b/f/c.yaml",
+        "Checking a0163f54c6a1fc4b123e241603d66bfc.yaml"
+    );
 }
 
 {
