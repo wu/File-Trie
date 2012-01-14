@@ -4,6 +4,7 @@ use Moose;
 # VERSION
 
 #_* Libraries
+use Carp;
 use File::Basename;
 use File::Path;
 use YAML::XS;
@@ -17,22 +18,32 @@ File::Trie - store data in a file in a directory tree using a trie of the id
 =head1 DESCRIPTION
 
 Given an id, this module will build a path for the id from a trie.
+This allows you to store a very large number of files in a directory
+tree without having too many files in any specific directory.
+
+For more information on a trie, see:
+
+  http://en.wikipedia.org/wiki/Trie
+
 For example, if your id is 'abc', then the path would be stored to
-'/a/b/c'.  If your id was 'foo.yaml', the path would be '/f/o/o.yaml'.
-This allows you to store a very large number of ids in a directory
-without having too many files in any specific directory.
+'/a/b/c'.
+
+There is also some special handling for ids that look like a filename,
+i.e. those that have extensions.  For example, if your id was
+'foo.yaml', the path would be '/f/o/o.yaml'.
 
 =head1 SYNOPSIS
 
   my $trie = File::Trie->new( { root => '/foo' } );
 
-  # returns "/a/b/c/d.yaml"
   my $path = $trie->trie( "abcd.yaml" );
+  #  $path = "/a/b/c/d.yaml"
 
   # write data to the file in /foo/a/b/c/d.yaml
-  $trie->write( { 1 => 2 }, 'abcd.yaml';
+  $trie->write( $data_h, 'abcd.yaml' );
+  $trie->write( { 1 => 2, foo => 'bar' }, 'abcde.yaml' );
 
-  # read data back in again
+  # read data back in again from /foo/a/b/c/d.yaml
   my $data = $trie->read( 'abcd.yaml' );
 
 =cut
@@ -103,6 +114,10 @@ For example, if the id were 'abc.yaml', the trie path would be
 sub trie {
     my ( $self, $orig_id ) = @_;
 
+    unless ( $orig_id ) {
+        carp( "ERROR: trie called without an id" );
+    }
+
     my $count = 0;
 
     my $id = $orig_id;
@@ -135,10 +150,20 @@ sub trie {
 Given a data reference and an id, write the data to a .yaml file in
 the directory tree.
 
+If the file already exists, it will be overwritten. with the new data.
+
 =cut
 
 sub write {
     my ( $self, $data, $id ) = @_;
+
+    unless ( $data ) {
+        carp( "ERROR: write() called with no data" );
+    }
+
+    unless ( $id ) {
+        carp( "ERROR: write() called with no id" );
+    }
 
     my $path = $self->_get_filename_mkdir( $id );
 
@@ -154,6 +179,10 @@ the loaded data.
 
 sub read {
     my ( $self, $id ) = @_;
+
+    unless ( $id ) {
+        carp( "ERROR: read() called with no id" );
+    }
 
     my $path = $self->_get_filename_mkdir( $id );
 
@@ -183,3 +212,15 @@ __PACKAGE__->meta->make_immutable;
 1;
 
 __END__
+
+#_* Notes
+
+=head1 NOTES
+
+The performance may be poor if the ids are long (e.g. 32 chars or
+more) and maxdepth is not specified, as this will result in creating a
+very large number of directories each time an item is inserted.
+
+It probably goes without saying, but when reading files from disk, you
+must have maxdepth and bytes set to the same value as they were set
+when the data was inserted.
